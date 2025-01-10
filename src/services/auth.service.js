@@ -1,7 +1,9 @@
 import createHttpError from "http-errors";
 import validator from "validator";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { UserModel } from "../models/userModel.js";
+import { getNewTokens } from "../utils/getNewTokens.js";
 
 export const createUser = async (userData) => {
   const { name, email, picture, status, password } = userData;
@@ -62,8 +64,8 @@ export const createUser = async (userData) => {
   const newObj = newUser._doc;
   delete newObj.password;
 
-  console.log("newObj = ", newObj);
-  return newUser;
+  // console.log("newObj = ", newObj);
+  return newObj;
 };
 
 export const signUser = async (email, password) => {
@@ -81,4 +83,28 @@ export const signUser = async (email, password) => {
   delete newObj.password;
 
   return newObj;
+};
+
+export const getRefreshToken = async (refreshToken) => {
+  // check if refresh token valid
+  const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+  if (!decoded) {
+    throw createHttpError.BadRequest("Invalid refresh token");
+  }
+
+  if (decoded.type !== "refresh") {
+    throw createHttpError.BadRequest("Invalid token type");
+  }
+
+  // check if user exists
+  const user = await UserModel.findById(decoded.id);
+
+  if (!user) {
+    throw createHttpError.BadRequest("User not found");
+  }
+
+  const token = getNewTokens(user);
+
+  return token;
 };

@@ -1,10 +1,16 @@
 import { token } from "morgan";
-import { createUser, signUser } from "../services/auth.service.js";
+import createHttpError from "http-errors";
+import {
+  createUser,
+  getRefreshToken,
+  signUser,
+} from "../services/auth.service.js";
 import { getNewTokens } from "../utils/getNewTokens.js";
+import { replaceMongoIdInObject } from "../utils/mongoDB.utils.js";
 
 export const register = async (req, res, next) => {
   try {
-    const { name, email, picture, password } = req.body;
+    const { name, email, picture, password } = req.body || {};
     const newUser = await createUser({
       name,
       email,
@@ -12,11 +18,14 @@ export const register = async (req, res, next) => {
       password,
     });
 
-    const { accessToken, refreshToken } = getNewTokens(newUser);
+    const { accessToken, refreshToken } = getNewTokens(
+      replaceMongoIdInObject(newUser)
+    );
 
-    return res
-      .status(201)
-      .json({ user: newUser, token: { accessToken, refreshToken } });
+    return res.status(201).json({
+      user: replaceMongoIdInObject(newUser),
+      token: { accessToken, refreshToken },
+    });
   } catch (error) {
     next(error);
   }
@@ -24,14 +33,17 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
     const user = await signUser(email, password);
 
-    const { accessToken, refreshToken } = getNewTokens(user);
+    const { accessToken, refreshToken } = getNewTokens(
+      replaceMongoIdInObject(user)
+    );
 
-    return res
-      .status(200)
-      .json({ user: user, token: { accessToken, refreshToken } });
+    return res.status(200).json({
+      user: replaceMongoIdInObject(user),
+      token: { accessToken, refreshToken },
+    });
   } catch (error) {
     next(error);
   }
@@ -39,7 +51,17 @@ export const login = async (req, res, next) => {
 
 export const refreshToken = async (req, res, next) => {
   try {
-    return res.status(200).json({ message: "welcome to refreshToken route" });
+    const { refreshToken } = req.body || {};
+
+    if (!refreshToken) {
+      throw createHttpError.BadRequest("Please provide refreshToken");
+    }
+
+    const result = await getRefreshToken(refreshToken);
+
+    // console.log("result = ", result);
+
+    return res.status(200).json(result);
   } catch (error) {
     next(error);
   }
