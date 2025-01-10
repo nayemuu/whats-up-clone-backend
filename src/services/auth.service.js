@@ -1,6 +1,7 @@
 import createHttpError from "http-errors";
 import validator from "validator";
-import { userModel } from "../models/userModel.js";
+import bcrypt from "bcrypt";
+import { UserModel } from "../models/userModel.js";
 
 export const createUser = async (userData) => {
   const { name, email, picture, status, password } = userData;
@@ -30,7 +31,7 @@ export const createUser = async (userData) => {
   }
 
   //check if user already exist
-  const isUserExists = await userModel.findOne({ email });
+  const isUserExists = await UserModel.findOne({ email });
   if (isUserExists) {
     throw createHttpError.Conflict(
       "Please try again with a different email address, this email already exist."
@@ -49,12 +50,35 @@ export const createUser = async (userData) => {
     );
   }
 
-  const newUser = await userModel.create({
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const newUser = await UserModel.create({
     name,
     email,
-    password: password,
+    password: hashedPassword,
   });
 
-  //   console.log("newUser = ", newUser);
+  // console.log("newUser = ", newUser);
+  const newObj = newUser._doc;
+  delete newObj.password;
+
+  console.log("newObj = ", newObj);
   return newUser;
+};
+
+export const signUser = async (email, password) => {
+  const user = await UserModel.findOne({ email }).lean();
+
+  //check if user exist
+  if (!user) throw createHttpError.NotFound("Invalid credentials.");
+
+  //compare passwords
+  let passwordMatches = await bcrypt.compare(password, user.password);
+
+  if (!passwordMatches) throw createHttpError.NotFound("Invalid credentials.");
+
+  const newObj = { ...user };
+  delete newObj.password;
+
+  return newObj;
 };

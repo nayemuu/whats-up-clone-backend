@@ -42,24 +42,4 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
-  try {
-    if (this.isNew) {
-      const salt = await bcrypt.genSalt(12);
-      const hashedPassword = await bcrypt.hash(this.password, salt);
-      this.password = hashedPassword;
-    }
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Example of querying a user and excluding the password field manually
-userSchema.methods.toJSON = function () {
-  const user = this.toObject();
-  delete user.password; // Manually remove the password field when returning the user object
-  return user;
-};
-
-export const userModel = mongoose.model("User", userSchema);
+export const UserModel = mongoose.model("User", userSchema);

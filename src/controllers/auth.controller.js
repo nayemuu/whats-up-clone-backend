@@ -1,6 +1,6 @@
 import { token } from "morgan";
-import { createUser } from "../services/auth.service.js";
-import { generateToken } from "../services/token.service.js";
+import { createUser, signUser } from "../services/auth.service.js";
+import { getNewTokens } from "../utils/getNewTokens.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -12,16 +12,7 @@ export const register = async (req, res, next) => {
       password,
     });
 
-    const accessToken = await generateToken(
-      { userId: newUser._id },
-      "1d",
-      process.env.ACCESS_TOKEN_SECRET
-    );
-    const refreshToken = await generateToken(
-      { userId: newUser._id },
-      "30d",
-      process.env.REFRESH_TOKEN_SECRET
-    );
+    const { accessToken, refreshToken } = getNewTokens(newUser);
 
     return res
       .status(201)
@@ -33,15 +24,14 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    return res.status(200).json({ data: req.body });
-  } catch (error) {
-    next(error);
-  }
-};
+    const { email, password } = req.body;
+    const user = await signUser(email, password);
 
-export const logout = async (req, res, next) => {
-  try {
-    return res.status(200).json({ message: "welcome to logout route" });
+    const { accessToken, refreshToken } = getNewTokens(user);
+
+    return res
+      .status(200)
+      .json({ user: user, token: { accessToken, refreshToken } });
   } catch (error) {
     next(error);
   }
