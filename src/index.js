@@ -1,6 +1,7 @@
 import app from "./app.js";
 import dotenv from "dotenv";
 import logger from "./configs/logger.config.js";
+import mongoose from "mongoose";
 
 //dotenv config
 dotenv.config();
@@ -8,7 +9,18 @@ dotenv.config();
 //env variable
 const PORT = process.env.PORT || 9000;
 
-let server = app.listen(PORT, () => {
+export const connectToDatabase = async () => {
+  try {
+    await mongoose.connect(process.env.DATABASE_URL);
+    logger.info("connected to mongoDB");
+  } catch (error) {
+    logger.error(error);
+    process.exit(1);
+  }
+};
+
+let server = app.listen(PORT, async () => {
+  await connectToDatabase();
   logger.info(`server is listening at ${PORT} port`);
 });
 

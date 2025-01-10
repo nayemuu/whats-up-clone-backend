@@ -8,6 +8,8 @@ import compression from "compression";
 import fileUpload from "express-fileupload";
 import cors from "cors";
 import createHttpError from "http-errors";
+import routes from "./routes/index.js";
+import logger from "./configs/logger.config.js";
 
 //dotenv config
 dotenv.config();
@@ -48,9 +50,8 @@ app.use(
 //cors
 app.use(cors());
 
-app.get("/", (req, res) => {
-  res.send("welcome");
-});
+//api v1 routes
+app.use("/api/v1", routes);
 
 //not found page
 app.use(async (req, res, next) => {
@@ -60,6 +61,7 @@ app.use(async (req, res, next) => {
 
 // error handling middleware
 function errorHandler(err, req, res, next) {
+  // logger.error(err);
   res.status(err.status || 500);
   res.send({
     error: {
