@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { UserModel } from "../models/userModel.js";
 import { getNewTokens } from "../utils/getNewTokens.js";
+import { replaceMongoIdInObject } from "../utils/mongoDB.utils.js";
 
 export const createUser = async (userData) => {
   const { name, email, picture, status, password } = userData;
@@ -65,7 +66,7 @@ export const createUser = async (userData) => {
   delete newObj.password;
 
   // console.log("newObj = ", newObj);
-  return newObj;
+  return replaceMongoIdInObject(newObj);
 };
 
 export const signUser = async (email, password) => {
@@ -82,7 +83,7 @@ export const signUser = async (email, password) => {
   const newObj = { ...user };
   delete newObj.password;
 
-  return newObj;
+  return replaceMongoIdInObject(newObj);
 };
 
 export const getRefreshToken = async (refreshToken) => {

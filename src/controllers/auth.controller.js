@@ -6,7 +6,6 @@ import {
   signUser,
 } from "../services/auth.service.js";
 import { getNewTokens } from "../utils/getNewTokens.js";
-import { replaceMongoIdInObject } from "../utils/mongoDB.utils.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -18,12 +17,10 @@ export const register = async (req, res, next) => {
       password,
     });
 
-    const { accessToken, refreshToken } = getNewTokens(
-      replaceMongoIdInObject(newUser)
-    );
+    const { accessToken, refreshToken } = getNewTokens(newUser);
 
     return res.status(201).json({
-      user: replaceMongoIdInObject(newUser),
+      user: newUser,
       token: { accessToken, refreshToken },
     });
   } catch (error) {
@@ -36,12 +33,10 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body || {};
     const user = await signUser(email, password);
 
-    const { accessToken, refreshToken } = getNewTokens(
-      replaceMongoIdInObject(user)
-    );
+    const { accessToken, refreshToken } = getNewTokens(user);
 
     return res.status(200).json({
-      user: replaceMongoIdInObject(user),
+      user: user,
       token: { accessToken, refreshToken },
     });
   } catch (error) {
