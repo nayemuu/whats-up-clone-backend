@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import validator from "validator";
-import bcrypt from "bcrypt";
 
 const { Schema } = mongoose;
 
@@ -42,4 +41,6 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-export const UserModel = mongoose.model("User", userSchema);
+const UserModel = mongoose.models.User ?? mongoose.model("User", userSchema);
+
+export default UserModel;

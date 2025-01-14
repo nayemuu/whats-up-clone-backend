@@ -9,7 +9,7 @@ import fileUpload from "express-fileupload";
 import cors from "cors";
 import createHttpError from "http-errors";
 import routes from "./routes/index.js";
-import logger from "./configs/logger.config.js";
+import { logger } from "./configs/logger.config.js";
 
 //dotenv config
 dotenv.config();

@@ -2,9 +2,9 @@ import createHttpError from "http-errors";
 import validator from "validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { UserModel } from "../models/userModel.js";
 import { getNewTokens } from "../utils/getNewTokens.js";
 import { replaceMongoIdInObject } from "../utils/mongoDB.utils.js";
+import { UserModel } from "../models/index.js";
 
 export const createUser = async (userData) => {
   const { name, email, picture, status, password } = userData;
