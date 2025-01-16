@@ -1,5 +1,10 @@
 import createHttpError from "http-errors";
 import { logger } from "../configs/logger.config.js";
+import {
+  createConversation,
+  doesConversationExist,
+} from "../services/conversation.service.js";
+import { findUser } from "../services/user.service.js";
 
 export const create_open_conversation = async (req, res, next) => {
   try {
@@ -14,7 +19,7 @@ export const create_open_conversation = async (req, res, next) => {
       logger.error(
         "please provide the user id you wanna start a conversation with !"
       );
-      throw createHttpError.BadRequest("Oops...Something went wrong !");
+      throw createHttpError.BadRequest("please provide the receiver_id");
     }
 
     //check if chat exists
@@ -24,7 +29,19 @@ export const create_open_conversation = async (req, res, next) => {
       false
     );
 
-    res.json({ message: "success" });
+    if (existed_conversation) {
+      res.json(existed_conversation);
+    } else {
+      let receiver_user = await findUser(receiver_id);
+      let convoData = {
+        name: receiver_user.name,
+        isGroup: false,
+        users: [sender_id, receiver_id],
+      };
+      const newConvo = await createConversation(convoData);
+
+      res.json(newConvo);
+    }
   } catch (error) {
     next(error);
   }
