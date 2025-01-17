@@ -3,6 +3,8 @@ import { logger } from "../configs/logger.config.js";
 import {
   createConversation,
   doesConversationExist,
+  getUserConversations,
+  populateConversation,
 } from "../services/conversation.service.js";
 import { findUser } from "../services/user.service.js";
 
@@ -11,8 +13,8 @@ export const create_open_conversation = async (req, res, next) => {
     const sender_id = req.user.id;
     const { receiver_id } = req.body;
 
-    console.log("sender_id = ", sender_id);
-    console.log("receiver_id = ", receiver_id);
+    // console.log("sender_id = ", sender_id);
+    // console.log("receiver_id = ", receiver_id);
 
     //check if receiver_id is provided
     if (!receiver_id) {
@@ -39,9 +41,23 @@ export const create_open_conversation = async (req, res, next) => {
         users: [sender_id, receiver_id],
       };
       const newConvo = await createConversation(convoData);
-
-      res.json(newConvo);
+      const populatedConvo = await populateConversation(
+        newConvo._id,
+        "users",
+        "-password"
+      );
+      res.status(200).json(populatedConvo);
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getConversation = async (req, res, next) => {
+  try {
+    const user_id = req.user.id;
+    const conversations = await getUserConversations(user_id);
+    res.status(200).json(conversations);
   } catch (error) {
     next(error);
   }

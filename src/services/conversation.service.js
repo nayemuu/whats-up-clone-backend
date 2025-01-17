@@ -34,3 +34,21 @@ export const createConversation = async (data) => {
     throw createHttpError.BadRequest("Oops...Something went wrong !");
   return newConvo;
 };
+
+export const populateConversation = async (
+  id,
+  fieldToPopulate,
+  fieldsToRemove
+) => {
+  const populatedConvo = await ConversationModel.findOne({ _id: id }).populate(
+    fieldToPopulate,
+    fieldsToRemove
+  );
+  if (!populatedConvo)
+    throw createHttpError.BadRequest("Oops...Something went wrong !");
+  return populatedConvo;
+};
+
+export const getUserConversations = async (user_id) => {
+  let conversations;
+};

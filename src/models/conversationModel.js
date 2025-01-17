@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const { ObjectId } = mongoose.Schema.Types;
 
 const { Schema } = mongoose;
@@ -20,7 +19,7 @@ const userSchema = new Schema(
     users: [
       {
         type: ObjectId,
-        ref: "UserModel",
+        ref: "User", // This User is reffering your User model name which you passed in mongoose.model() method
       },
     ],
     latestMessage: {
@@ -29,7 +28,7 @@ const userSchema = new Schema(
     },
     admin: {
       type: ObjectId,
-      ref: "UserModel",
+      ref: "User",
     },
   },
   { timestamps: true }
