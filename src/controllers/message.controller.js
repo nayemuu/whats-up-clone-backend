@@ -1,6 +1,10 @@
 import createHttpError from "http-errors";
 import { logger } from "../configs/logger.config.js";
-import { createMessage, populateMessage } from "../services/message.service.js";
+import {
+  createMessage,
+  getConvoMessages,
+  populateMessage,
+} from "../services/message.service.js";
 import { updateLatestMessage } from "../services/conversation.service.js";
 
 export const sendMessage = async (req, res, next) => {
@@ -30,6 +34,15 @@ export const sendMessage = async (req, res, next) => {
 
 export const getMessages = async (req, res, next) => {
   try {
+    const convo_id = req.params.convo_id;
+    if (!convo_id) {
+      logger.error("Please add a conversation id in params.");
+      throw createHttpError.BadRequest(
+        "Please add a conversation id in params."
+      );
+    }
+    const messages = await getConvoMessages(convo_id);
+    res.json(messages);
   } catch (error) {
     next(error);
   }
