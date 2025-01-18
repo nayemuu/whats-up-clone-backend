@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 const { ObjectId } = mongoose.Schema.Types;
-
 const { Schema } = mongoose;
 
-const userSchema = new Schema(
+const conversationSchema = new Schema(
   {
     name: {
       type: String,
@@ -24,7 +23,7 @@ const userSchema = new Schema(
     ],
     latestMessage: {
       type: ObjectId,
-      ref: "MessageModel",
+      ref: "Message",
     },
     admin: {
       type: ObjectId,
@@ -35,6 +34,7 @@ const userSchema = new Schema(
 );
 
 const ConversationModel =
-  mongoose.models.Conversation ?? mongoose.model("Conversation", userSchema);
+  mongoose.models.Conversation ??
+  mongoose.model("Conversation", conversationSchema);
 
 export default ConversationModel;
